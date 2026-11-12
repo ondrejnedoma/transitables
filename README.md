@@ -1,17 +1,22 @@
-# transitables
+<div align="center">
+<img style="border-radius: 48px;" src="assets/icon/icon.png" width=160 height=160 align="center">
 
-A new Flutter project.
+# TransiTables
 
-## Getting Started
+A Flutter app with simple departure tables from the [Transitous](https://transitous.com) API
 
-This project is a starting point for a Flutter application.
+</div>
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+<div align="center">
+<div>
+<img src="assets/screenshots/Screenshot_1794485670.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794485682.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794485704.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794485751.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794485799.png" width="30%" />
+</div>
+</div>
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<br>
