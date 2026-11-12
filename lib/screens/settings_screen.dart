@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
       final savedPath = await FileSaver.instance.saveAs(
-        name: 'transitables-backup',
+        name: 'transitables-${DateTime.now().millisecondsSinceEpoch}',
         bytes: bytes,
         fileExtension: 'json',
         mimeType: MimeType.other,

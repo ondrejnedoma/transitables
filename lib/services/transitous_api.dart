@@ -115,13 +115,19 @@ class TransitousApi {
 
     final hasFilter = table.filter.isNotEmpty;
     if (hasFilter) {
-      final ids = table.filter.map((s) => s.id).toSet();
-      final names = table.filter.map((s) => s.name).toSet();
+      final patterns = table.filter
+          .map((pattern) => pattern.trim().toLowerCase())
+          .where((pattern) => pattern.isNotEmpty)
+          .toList();
       departures = departures
           .where(
-            (d) =>
-                d.passingStopIds.any(ids.contains) ||
-                d.passingStopNames.any(names.contains),
+            (d) => patterns.any(
+              (pattern) =>
+                  d.destination.toLowerCase().contains(pattern) ||
+                  d.passingStopNames.any(
+                    (name) => name.toLowerCase().contains(pattern),
+                  ),
+            ),
           )
           .toList();
     }

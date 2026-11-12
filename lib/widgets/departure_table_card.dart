@@ -235,7 +235,7 @@ class DepartureTableCardState extends State<DepartureTableCard> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  table.filter.map((s) => s.name).join(', '),
+                                  table.filter.join(', '),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: scheme.onSurfaceVariant,
                                   ),

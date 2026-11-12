@@ -1,9 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../models/stop_ref.dart';
 import '../models/table_config.dart';
 import '../services/app_store.dart';
-import 'stop_search_screen.dart';
 
 class TableSettingsScreen extends StatefulWidget {
   const TableSettingsScreen({
@@ -30,20 +28,24 @@ class _TableSettingsScreenState extends State<TableSettingsScreen> {
     store.changed();
   }
 
-  Future<void> _addFilterStop() async {
-    final stop = await Navigator.of(context).push<StopRef>(
-      MaterialPageRoute(
-        builder: (_) => const StopSearchScreen(title: 'Add filter stop'),
-      ),
+  Future<void> _addFilterPattern() async {
+    final pattern = await showDialog<String>(
+      context: context,
+      builder: (_) => const _AddFilterPatternDialog(),
     );
-    if (stop == null || !mounted) return;
-    if (table.filter.any((s) => s.id == stop.id)) return;
-    setState(() => table.filter.add(stop));
+    final value = pattern?.trim();
+    if (value == null || value.isEmpty || !mounted) return;
+    if (table.filter.any(
+      (pattern) => pattern.toLowerCase() == value.toLowerCase(),
+    )) {
+      return;
+    }
+    setState(() => table.filter.add(value));
     store.changed();
   }
 
-  void _removeFilterStop(StopRef stop) {
-    setState(() => table.filter.remove(stop));
+  void _removeFilterPattern(String pattern) {
+    setState(() => table.filter.remove(pattern));
     store.changed();
   }
 
@@ -114,10 +116,10 @@ class _TableSettingsScreenState extends State<TableSettingsScreen> {
             ],
           ),
           const Divider(height: 40),
-          Text('Filter by stops', style: theme.textTheme.titleMedium),
+          Text('Filter by stop names', style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
-            'Only connections passing through at least one of these stops '
+            'Only connections with a matching destination or passing stop '
             'are shown.',
             style: theme.textTheme.bodySmall?.copyWith(color: grey),
           ),
@@ -130,31 +132,73 @@ class _TableSettingsScreenState extends State<TableSettingsScreen> {
                 style: TextStyle(color: grey),
               ),
             ),
-          for (final stop in table.filter)
+          for (final pattern in table.filter)
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.filter_alt_outlined),
-              title: Text(stop.name),
-              subtitle: Text(
-                stop.id,
-                style: theme.textTheme.bodySmall?.copyWith(color: grey),
-              ),
+              title: Text(pattern),
               trailing: IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: () => _removeFilterStop(stop),
+                onPressed: () => _removeFilterPattern(pattern),
               ),
             ),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
             child: OutlinedButton.icon(
-              onPressed: _addFilterStop,
+              onPressed: _addFilterPattern,
               icon: const Icon(Icons.add),
-              label: const Text('Add stop'),
+              label: const Text('Add name'),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _AddFilterPatternDialog extends StatefulWidget {
+  const _AddFilterPatternDialog();
+
+  @override
+  State<_AddFilterPatternDialog> createState() =>
+      _AddFilterPatternDialogState();
+}
+
+class _AddFilterPatternDialogState extends State<_AddFilterPatternDialog> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _close([String? value]) {
+    // Close the keyboard before the dialog transition; keep the controller
+    // alive until this dialog subtree is disposed after that transition.
+    FocusScope.of(context).unfocus();
+    Navigator.of(context).pop(value);
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Add stop name filter'),
+    content: TextField(
+      controller: _controller,
+      autofocus: true,
+      decoration: const InputDecoration(
+        labelText: 'Stop name includes',
+        hintText: 'For example, Main Street',
+      ),
+      onSubmitted: (value) => _close(value),
+    ),
+    actions: [
+      TextButton(onPressed: _close, child: const Text('Cancel')),
+      FilledButton(
+        onPressed: () => _close(_controller.text),
+        child: const Text('Add'),
+      ),
+    ],
+  );
 }

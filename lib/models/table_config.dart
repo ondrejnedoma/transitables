@@ -1,16 +1,14 @@
-import 'stop_ref.dart';
-
 class TableConfig {
   TableConfig({
     required this.name,
     required this.id,
-    List<StopRef>? filter,
+    List<String>? filter,
     this.n = 5,
   }) : filter = filter ?? [];
 
   String name;
   String id;
-  List<StopRef> filter;
+  List<String> filter;
   int n;
 
   factory TableConfig.fromJson(Map<String, dynamic> json) => TableConfig(
@@ -18,14 +16,14 @@ class TableConfig {
     id: json['id'] as String,
     n: (json['n'] as num?)?.toInt() ?? 5,
     filter: ((json['filter'] as List?) ?? const [])
-        .map((e) => StopRef.fromJson(e as Map<String, dynamic>))
+        .whereType<String>()
         .toList(),
   );
 
   Map<String, dynamic> toJson() => {
     'name': name,
     'id': id,
-    'filter': filter.map((e) => e.toJson()).toList(),
+    'filter': filter,
     'n': n,
   };
 }
