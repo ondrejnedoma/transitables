@@ -19,10 +19,10 @@ class DepartureTableCard extends StatefulWidget {
   final int screenIndex;
 
   @override
-  State<DepartureTableCard> createState() => _DepartureTableCardState();
+  State<DepartureTableCard> createState() => DepartureTableCardState();
 }
 
-class _DepartureTableCardState extends State<DepartureTableCard> {
+class DepartureTableCardState extends State<DepartureTableCard> {
   List<Departure>? _departures;
   List<Departure> _visibleDepartures = [];
   bool _loading = true;
@@ -39,7 +39,7 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
       _ticks++;
       setState(() => _now = DateTime.now().toUtc());
       _syncVisibleDepartures();
-      if (_ticks % 20 == 0) _load();
+      if (_ticks % 30 == 0) _load();
     });
   }
 
@@ -56,6 +56,7 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
         _departures = null;
         _visibleDepartures = [];
       }
+
       _loading = true;
     });
     try {
@@ -73,6 +74,8 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
       });
     }
   }
+
+  Future<void> refresh() => _load();
 
   bool _sameDeparture(Departure a, Departure b) =>
       a.departure == b.departure &&

@@ -2,14 +2,30 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 
+import '../models/table_config.dart';
 import '../services/app_store.dart';
 import 'departure_table_card.dart';
 
 /// One page of the PageView: the reorderable list of tables of a screen.
-class ScreenPage extends StatelessWidget {
+class ScreenPage extends StatefulWidget {
   const ScreenPage({super.key, required this.screenIndex});
 
   final int screenIndex;
+
+  @override
+  State<ScreenPage> createState() => _ScreenPageState();
+}
+
+class _ScreenPageState extends State<ScreenPage> {
+  final Map<TableConfig, GlobalKey<DepartureTableCardState>> _tableKeys = {};
+
+  Future<void> _refreshTables() async {
+    final tables = store.tablesOf(widget.screenIndex);
+    await Future.wait([
+      for (final table in tables)
+        _tableKeys[table]?.currentState?.refresh() ?? Future<void>.value(),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +34,7 @@ class ScreenPage extends StatelessWidget {
     return ListenableBuilder(
       listenable: store,
       builder: (context, _) {
-        final tables = store.tablesOf(screenIndex);
+        final tables = store.tablesOf(widget.screenIndex);
 
         if (tables.isEmpty) {
           return Stack(
@@ -76,26 +92,34 @@ class ScreenPage extends StatelessWidget {
           );
         }
 
-        return ReorderableListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-          buildDefaultDragHandles: false,
-          itemCount: tables.length,
-          onReorderItem: (oldIndex, newIndex) =>
-              store.reorder(screenIndex, oldIndex, newIndex),
-          itemBuilder: (context, i) {
-            final table = tables[i];
-            return ReorderableDelayedDragStartListener(
-              key: ObjectKey(table),
-              index: i,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: DepartureTableCard(
-                  table: table,
-                  screenIndex: screenIndex,
+        return RefreshIndicator(
+          onRefresh: _refreshTables,
+          child: ReorderableListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            buildDefaultDragHandles: false,
+            itemCount: tables.length,
+            onReorderItem: (oldIndex, newIndex) =>
+                store.reorder(widget.screenIndex, oldIndex, newIndex),
+            itemBuilder: (context, i) {
+              final table = tables[i];
+              final tableKey = _tableKeys.putIfAbsent(
+                table,
+                () => GlobalKey<DepartureTableCardState>(),
+              );
+              return ReorderableDelayedDragStartListener(
+                key: ObjectKey(table),
+                index: i,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: DepartureTableCard(
+                    key: tableKey,
+                    table: table,
+                    screenIndex: widget.screenIndex,
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );

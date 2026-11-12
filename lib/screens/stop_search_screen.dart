@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:material_ui/material_ui.dart';
 
 import '../models/stop_ref.dart';
@@ -17,7 +15,6 @@ class StopSearchScreen extends StatefulWidget {
 
 class _StopSearchScreenState extends State<StopSearchScreen> {
   final TextEditingController _controller = TextEditingController();
-  Timer? _debounce;
   int _requestId = 0;
 
   List<StopRef> _results = const [];
@@ -26,17 +23,12 @@ class _StopSearchScreenState extends State<StopSearchScreen> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   void _onChanged(String text) {
-    _debounce?.cancel();
-    _debounce = Timer(
-      const Duration(milliseconds: 500),
-      () => _search(text.trim()),
-    );
+    _search(text.trim());
   }
 
   Future<void> _search(String text) async {
