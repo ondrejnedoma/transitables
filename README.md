@@ -11,11 +11,12 @@ A Flutter app with simple departure tables from the [Transitous](https://transit
 
 <div align="center">
 <div>
-<img src="assets/screenshots/Screenshot_1794485670.png" width="30%" />
-<img src="assets/screenshots/Screenshot_1794485682.png" width="30%" />
-<img src="assets/screenshots/Screenshot_1794485704.png" width="30%" />
-<img src="assets/screenshots/Screenshot_1794485751.png" width="30%" />
-<img src="assets/screenshots/Screenshot_1794485799.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794515964.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794515974.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794516011.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794516029.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794516042.png" width="30%" />
+<img src="assets/screenshots/Screenshot_1794516055.png" width="30%" />
 </div>
 </div>
 
