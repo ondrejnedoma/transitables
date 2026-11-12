@@ -1,14 +1,18 @@
 // import 'package:flutter/material.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import 'screens/home_screen.dart';
 import 'services/app_store.dart';
+import 'services/transitous_api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz_data.initializeTimeZones();
+  final packageInfo = await PackageInfo.fromPlatform();
+  TransitousApi.setAppVersion(packageInfo.version);
   await store.load();
   runApp(const TransitablesApp());
 }

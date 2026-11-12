@@ -10,13 +10,22 @@ class TransitousApi {
   TransitousApi._();
 
   static const _host = 'api.transitous.org';
-  static const _filterWindowSeconds = 172800; // 2 days
+  static const _filterWindowSeconds = 86400; // 1 day
   static final http.Client _client = http.Client();
+  static String _userAgent =
+      'TransiTables/unknownVersion (https://github.com/ondrejnedoma)';
+
+  static void setAppVersion(String version) {
+    _userAgent = 'TransiTables/$version (https://github.com/ondrejnedoma)';
+  }
+
+  static Map<String, String> get _headers => {'User-Agent': _userAgent};
 
   /// GET /api/v1/geocode?text=...  (only STOP results can be used for departures)
   static Future<List<StopRef>> searchStops(String text) async {
     final res = await _client.get(
       Uri.https(_host, '/api/v1/geocode', {'text': text}),
+      headers: _headers,
     );
     if (res.statusCode != 200) {
       throw Exception('Search failed (${res.statusCode})');
@@ -38,6 +47,7 @@ class TransitousApi {
 
     final res = await _client.get(
       Uri.https(_host, '/api/v6/stoptimes', params),
+      headers: _headers,
     );
     if (res.statusCode != 200) {
       throw Exception('Could not load departures (${res.statusCode})');
@@ -54,11 +64,16 @@ class TransitousApi {
     final hasFilter = table.filter.isNotEmpty;
     if (hasFilter) {
       final ids = table.filter.map((s) => s.id).toSet();
+      final names = table.filter.map((s) => s.name).toSet();
       departures = departures
-          .where((d) => d.passingStopIds.any(ids.contains))
+          .where(
+            (d) =>
+                d.passingStopIds.any(ids.contains) ||
+                d.passingStopNames.any(names.contains),
+          )
           .toList();
     }
 
-    return departures.take(table.n).toList();
+    return departures;
   }
 }

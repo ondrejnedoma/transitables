@@ -11,12 +11,17 @@ final AppStore store = AppStore();
 /// Storage: List (screens) of List (tables) of {name, id, filter, n}.
 class AppStore extends ChangeNotifier {
   static const _key = 'screens';
+  static const _currentScreenKey = 'current_screen';
 
   final List<List<TableConfig>> _screens = [];
   SharedPreferences? _prefs;
+  int _currentScreen = 0;
+
+  int get currentScreen => _currentScreen;
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
+    _currentScreen = _prefs!.getInt(_currentScreenKey) ?? 0;
     final raw = _prefs!.getString(_key);
     if (raw == null) return;
     try {
@@ -33,6 +38,12 @@ class AppStore extends ChangeNotifier {
     } catch (_) {
       _screens.clear();
     }
+  }
+
+  void setCurrentScreen(int screen) {
+    if (screen < 0 || screen == _currentScreen) return;
+    _currentScreen = screen;
+    _prefs?.setInt(_currentScreenKey, screen);
   }
 
   List<TableConfig> tablesOf(int screen) =>

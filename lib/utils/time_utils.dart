@@ -20,6 +20,12 @@ String timeUntil(DateTime departureUtc, DateTime nowUtc) {
   final seconds = departureUtc.difference(nowUtc).inSeconds;
   if (seconds <= 0) return 'now';
   if (seconds <= 60) return '$seconds s';
-  final minutes = (seconds / 60).ceil() - 1; // 13:40 -> 13:42 shows "1 min"
+  final minutes = (seconds / 60).ceil() - 1;
+  if (seconds >= 60 * 60) {
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    if (remainingMinutes == 0) return '$hours h';
+    return '$hours h $remainingMinutes min';
+  }
   return minutes == 1 ? '1 min' : '$minutes mins';
 }

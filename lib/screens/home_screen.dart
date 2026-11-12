@@ -15,8 +15,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final PageController _controller = PageController();
-  int _page = 0;
+  late final PageController _controller;
+  late int _page;
+
+  @override
+  void initState() {
+    super.initState();
+    _page = store.currentScreen;
+    _controller = PageController(initialPage: _page);
+  }
 
   @override
   void dispose() {
@@ -56,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        // Taps on the empty parts of the bar (buttons sit on top of this).
         flexibleSpace: InkWell(onTap: _goToScreen),
         leading: IconButton(
           icon: const Icon(Icons.chevron_left),
@@ -66,7 +72,15 @@ class _HomeScreenState extends State<HomeScreen> {
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _goToScreen,
-          child: Text('Screen ${_page + 1}'),
+          child: Column(
+            children: [
+              Text(
+                'TransiTables',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+              Text('Screen ${_page + 1}'),
+            ],
+          ),
         ),
         actions: [
           IconButton(
@@ -76,10 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // No itemCount => infinite pages.
       body: PageView.builder(
         controller: _controller,
-        onPageChanged: (i) => setState(() => _page = i),
+        onPageChanged: (i) {
+          setState(() => _page = i);
+          store.setCurrentScreen(i);
+        },
         itemBuilder: (context, index) => ScreenPage(screenIndex: index),
       ),
       floatingActionButton: FloatingActionButton(

@@ -24,6 +24,7 @@ class DepartureTableCard extends StatefulWidget {
 
 class _DepartureTableCardState extends State<DepartureTableCard> {
   List<Departure>? _departures;
+  List<Departure> _visibleDepartures = [];
   bool _loading = true;
   int _requestId = 0;
   int _ticks = 0;
@@ -34,11 +35,11 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
   void initState() {
     super.initState();
     _load();
-    // Every second: refresh countdowns. Every 30 s: refetch.
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _ticks++;
       setState(() => _now = DateTime.now().toUtc());
-      if (_ticks % 30 == 0) _load();
+      _syncVisibleDepartures();
+      if (_ticks % 20 == 0) _load();
     });
   }
 
@@ -50,12 +51,13 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
 
   Future<void> _load({bool reset = false}) async {
     final id = ++_requestId;
-    if (reset) {
-      setState(() {
+    setState(() {
+      if (reset) {
         _departures = null;
-        _loading = true;
-      });
-    }
+        _visibleDepartures = [];
+      }
+      _loading = true;
+    });
     try {
       final result = await TransitousApi.fetchDepartures(widget.table);
       if (!mounted || id != _requestId) return;
@@ -63,12 +65,35 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
         _departures = result;
         _loading = false;
       });
+      _syncVisibleDepartures();
     } catch (_) {
       if (!mounted || id != _requestId) return;
       setState(() {
         _loading = false;
       });
     }
+  }
+
+  bool _sameDeparture(Departure a, Departure b) =>
+      a.departure == b.departure &&
+      a.displayName == b.displayName &&
+      a.destination == b.destination;
+
+  List<Departure> _desiredDepartures() => (_departures ?? const [])
+      .where((d) => d.departure.isAfter(_now))
+      .take(widget.table.n)
+      .toList();
+
+  void _syncVisibleDepartures() {
+    if (!mounted || _departures == null) return;
+    final desired = _desiredDepartures();
+    if (desired.length == _visibleDepartures.length &&
+        desired.asMap().entries.every(
+          (entry) => _sameDeparture(entry.value, _visibleDepartures[entry.key]),
+        )) {
+      return;
+    }
+    setState(() => _visibleDepartures = desired);
   }
 
   Future<void> _openSettings() async {
@@ -89,10 +114,7 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
 
     if (_departures == null) {
       if (_loading) {
-        return const Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: CircularProgressIndicator()),
-        );
+        return const SizedBox.shrink();
       }
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -110,40 +132,60 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
       );
     }
 
-    // Hide departures that already left between two refetches.
-    final shown = _departures!
-        .where((d) => d.departure.isAfter(_now))
-        .take(widget.table.n)
-        .toList();
-
-    if (shown.isEmpty) {
+    if (_visibleDepartures.isEmpty) {
       final hasFilter = widget.table.filter.isNotEmpty;
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Column(
-          children: [
-            const Text('😕', style: TextStyle(fontSize: 64)),
-            const SizedBox(height: 8),
-            Text(
-              hasFilter
-                  ? "Your filters don't match any results"
-                  : 'No upcoming departures',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: grey),
-            ),
-          ],
+        child: Center(
+          child: Column(
+            children: [
+              const Icon(Icons.error, size: 64),
+              const SizedBox(height: 8),
+              Text(
+                hasFilter
+                    ? "Your filters don't match any results"
+                    : 'No upcoming departures',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: grey),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return Column(
-      children: [
-        for (final d in shown)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: DepartureRow(departure: d, now: _now),
-          ),
-      ],
+    final signature = _visibleDepartures
+        .map((d) => '${d.departure.microsecondsSinceEpoch}:${d.displayName}')
+        .join('|');
+    return SizedBox(
+      height: widget.table.n * 54,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 350),
+        layoutBuilder: (current, previous) =>
+            Stack(fit: StackFit.expand, children: [...previous, ?current]),
+        transitionBuilder: (child, animation) {
+          final isIncoming = child.key == ValueKey<String>(signature);
+          final fade = FadeTransition(opacity: animation, child: child);
+          if (!isIncoming) return fade;
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.15),
+              end: Offset.zero,
+            ).animate(animation),
+            child: fade,
+          );
+        },
+        child: Column(
+          key: ValueKey(signature),
+          children: [
+            for (final departure in _visibleDepartures)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: DepartureRow(departure: departure, now: _now),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -202,6 +244,16 @@ class _DepartureTableCardState extends State<DepartureTableCard> {
                       ],
                     ),
                   ),
+                ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: _loading
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : null,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),

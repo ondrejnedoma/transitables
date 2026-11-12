@@ -11,6 +11,7 @@ class Departure {
     required this.timeZone,
     required this.cancelled,
     required this.passingStopIds,
+    required this.passingStopNames,
   });
 
   final String displayName;
@@ -28,6 +29,7 @@ class Departure {
 
   /// stopId + parentId of every upcoming stop and the destination.
   final Set<String> passingStopIds;
+  final Set<String> passingStopNames;
 
   bool get isDelayed => !departure.isAtSameMomentAs(scheduledDeparture);
 
@@ -39,12 +41,15 @@ class Departure {
         (place['scheduledDeparture'] ?? place['departure']) as String;
 
     final ids = <String>{};
+    final names = <String>{};
     void collect(dynamic stop) {
       if (stop is! Map) return;
       final stopId = stop['stopId'];
       final parentId = stop['parentId'];
+      final name = stop['name'];
       if (stopId is String) ids.add(stopId);
       if (parentId is String) ids.add(parentId);
+      if (name is String && name.isNotEmpty) names.add(name);
     }
 
     for (final s in (json['nextStops'] as List?) ?? const []) {
@@ -75,6 +80,7 @@ class Departure {
           json['tripCancelled'] == true ||
           place['cancelled'] == true,
       passingStopIds: ids,
+      passingStopNames: names,
     );
   }
 
