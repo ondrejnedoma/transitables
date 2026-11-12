@@ -36,26 +36,29 @@ class TransitablesApp extends StatelessWidget {
           brightness: Brightness.dark,
         );
 
-        return MaterialApp(
-          title: 'Material 3 Dynamic Theme',
-          debugShowCheckedModeBanner: false,
+        return ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => MaterialApp(
+            title: 'Material 3 Dynamic Theme',
+            debugShowCheckedModeBanner: false,
 
-          // Automatically follow system light/dark brightness settings
-          themeMode: ThemeMode.system,
+            // Automatically follow system light/dark brightness settings
+            themeMode: store.themeMode,
 
-          // Light Theme configuration
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: lightDynamic ?? fallbackLightScheme,
+            // Light Theme configuration
+            theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: lightDynamic ?? fallbackLightScheme,
+            ),
+
+            // Dark Theme configuration
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              colorScheme: darkDynamic ?? fallbackDarkScheme,
+            ),
+
+            home: const HomeScreen(),
           ),
-
-          // Dark Theme configuration
-          darkTheme: ThemeData(
-            useMaterial3: true,
-            colorScheme: darkDynamic ?? fallbackDarkScheme,
-          ),
-
-          home: const HomeScreen(),
         );
       },
     );

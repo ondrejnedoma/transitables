@@ -6,6 +6,7 @@ import '../services/app_store.dart';
 import '../widgets/go_to_screen_dialog.dart';
 import '../widgets/screen_page.dart';
 import 'stop_search_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,10 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _page = store.currentScreen;
     _controller = PageController(initialPage: _page);
+    store.addListener(_syncRestoredScreen);
+  }
+
+  void _syncRestoredScreen() {
+    if (_page == store.currentScreen) return;
+    _page = store.currentScreen;
+    if (_controller.hasClients) _controller.jumpToPage(_page);
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    store.removeListener(_syncRestoredScreen);
     _controller.dispose();
     super.dispose();
   }
@@ -64,10 +74,22 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         centerTitle: true,
         flexibleSpace: InkWell(onTap: _goToScreen),
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          tooltip: 'Previous screen',
-          onPressed: _page > 0 ? () => _animateBy(-1) : null,
+        leadingWidth: 96,
+        leading: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              tooltip: 'Previous screen',
+              onPressed: _page > 0 ? () => _animateBy(-1) : null,
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: 'Settings',
+              onPressed: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
+            ),
+          ],
         ),
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,

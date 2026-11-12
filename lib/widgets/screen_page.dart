@@ -1,6 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/gestures.dart';
 
 import '../models/table_config.dart';
 import '../services/app_store.dart';
@@ -37,58 +35,27 @@ class _ScreenPageState extends State<ScreenPage> {
         final tables = store.tablesOf(widget.screenIndex);
 
         if (tables.isEmpty) {
-          return Stack(
-            children: [
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.table_rows_rounded,
-                      size: 64,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'No tables on this screen yet',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tap + to add one',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.table_rows_rounded,
+                  size: 64,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 144),
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(text: 'Data provided by '),
-                        TextSpan(
-                          text: 'Transitous',
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => launchUrl(
-                              Uri.parse('https://transitous.org'),
-                              mode: LaunchMode.externalApplication,
-                            ),
-                        ),
-                      ],
-                    ),
-                  ),
+                const SizedBox(height: 12),
+                Text(
+                  'No tables on this screen yet',
+                  style: theme.textTheme.titleMedium,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  'Tap + to add one',
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
           );
         }
 
