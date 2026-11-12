@@ -1,4 +1,4 @@
-package com.example.transitables
+package me.ondrejnedoma.transitables
 
 import io.flutter.embedding.android.FlutterActivity
 
