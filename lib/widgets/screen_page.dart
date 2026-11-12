@@ -97,6 +97,10 @@ class _ScreenPageState extends State<ScreenPage> {
           child: ReorderableListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             buildDefaultDragHandles: false,
+            // Each table already provides its own rounded, elevated Material.
+            // The default proxy adds another Material around the full list
+            // item (including its spacing), creating a square shadow frame.
+            proxyDecorator: (child, index, animation) => child,
             itemCount: tables.length,
             onReorderItem: (oldIndex, newIndex) =>
                 store.reorder(widget.screenIndex, oldIndex, newIndex),
@@ -109,8 +113,8 @@ class _ScreenPageState extends State<ScreenPage> {
               return ReorderableDelayedDragStartListener(
                 key: ObjectKey(table),
                 index: i,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
                   child: DepartureTableCard(
                     key: tableKey,
                     table: table,
