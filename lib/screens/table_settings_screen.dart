@@ -189,7 +189,7 @@ class _AddFilterPatternDialogState extends State<_AddFilterPatternDialog> {
       autofocus: true,
       decoration: const InputDecoration(
         labelText: 'Stop name includes',
-        hintText: 'For example, Main Street',
+        hintText: 'Main Street',
       ),
       onSubmitted: (value) => _close(value),
     ),
